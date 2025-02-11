@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>显示照片</title>
+    <style>
+      body {
+        margin: 0; /* 去掉默认边距 */
+        height: 100vh; /* 设置高度为视口高度 */
+        background-image: url("zhao.jpg"); /* 设置背景图片 */
+        background-size: cover; /* 背景图片覆盖整个区域 */
+        background-position: center; /* 背景图片居中 */
+        transition: opacity 0.5s ease; /* 添加过渡效果 */
+        opacity: 1; /* 初始不透明度 */
+      }
+      .button-container {
+        text-align: center; /* 居中对齐 */
+        position: absolute; /* 绝对定位 */
+        bottom: 269px; /* 距离底部20px */
+        left: 86%; /* 水平居中 */
+        transform: translateX(-50%); /* 使其真正居中 */
+      }
+      .button {
+        padding: 1px 2px; /* 增大按钮内边距 */
+        font-size: 30px; /* 增大字体 */
+        color: white;
+        background-color: #6f00ff; /* 按钮颜色 */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none; /* 去掉下划线 */
+      }
+    </style>
+    <script>
+      function smoothTransition(url) {
+        document.body.style.opacity = 0; // 设置不透明度为0，开始淡出
+        setTimeout(() => {
+          window.location.href = url; // 在淡出后跳转
+        }, 500); // 与 CSS 过渡时间一致
+      }
+    </script>
+  </head>
+  <body>
+    <div class="button-container">
+      <a
+        href="javascript:void(0);"
+        class="button"
+        onclick="smoothTransition('huiyi.html')"
+        >Give me a five</a
+      >
+    </div>
+  </body>
+</html>

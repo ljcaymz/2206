@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WE ALL HERE</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- 引入苹果系统字体（需要有合法授权或使用类似字体） -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+ 
+    </header>
+    <main class="main-content">
+      <div class="gallery-container">
+        <h1 class="gallery-title">Welcome</h1>
+        <p class="gallery-subtitle">GUANG QUANQUAN</p>
+        <div class="media-grid">
+          <!-- 视频1 -->
+          <div class="media-card video-item" data-video="shipin.mp4">
+            <video muted loop poster="video1-thumb.jpg"></video>
+            <div class="media-hover">
+              <span class="play-icon">▶</span>
+              <p class="media-description">二零二五年终岁尾</p>
+            </div>
+          </div>
+          <!-- 图片1 -->
+          <div class="media-card image-item">
+            <img src="hezhao.jpg" alt="222" loading="lazy" />
+            <div class="media-hover">
+              <p class="media-description">二二二</p>
+            </div>
+          </div>
+          <!-- 视频2 -->
+          <div class="media-card video-item" data-video="shipin2.mp4">
+            <video muted loop poster="video2-thumb.jpg"></video>
+            <div class="media-hover">
+              <span class="play-icon">▶</span>
+              <p class="media-description">旺仔</p>
+            </div>
+          </div>
+          <!-- 图片2 -->
+          <div class="media-card image-item">
+            <img src="hezhao1.jpg" alt="足球赛MVP结算" loading="lazy" />
+            <div class="media-hover">
+              <p class="media-description">足球赛MVP结算</p>
+            </div>
+          </div>
+        </div>
+          <!-- 新增图片3 -->
+        <div class="media-card image-item">
+          <img src="zuqiu.jpg" alt="足球赛" />
+          <div class="media-hover">
+            <p class="media-description">足球赛</p>
+          </div>
+        </div>
+        <!-- 新增图片4 -->
+        <div class="media-card image-item">
+          <img src="zhunyou.jpg" alt="新图片4描述" />
+          <div class="media-hover">
+            <p class="media-description">春游</p>
+          </div>
+        </div>
+        <!-- 新增图片5 -->
+        <div class="media-card image-item">
+          <img src="e6c0d6fc96cf668d6e6cdbb247efa98.jpg" alt="新图片5描述" />
+          <div class="media-hover">
+            <p class="media-description">运动会</p>
+          </div>
+        </div>
+        <!-- 新增图片6 -->
+        <div class="media-card image-item">
+          <img src="gaoyiyundonghui.jpg" alt="新图片6描述" />
+          <div class="media-hover">
+            <p class="media-description">高一运动会</p>
+          </div>
+        </div>
+      </div>
+        <!-- 全屏播放器 -->
+        <div class="fullscreen-overlay">
+          <span class="close-btn">&times;</span>
+          <video class="fullscreen-video" controls></video>
+          <img class="fullscreen-image" src="" alt="放大图片" />
+        </div>
+      </div>
+    </main>
+    <!-- 页脚 -->
+    <footer class="footer">
+      <p>&copy; 2025 WE ALL HERE. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>

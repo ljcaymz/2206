@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>循环出现与消失的文本</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #000000; /* 深色背景 */
+        color: white; /* 白色字体 */
+        font-family: "Arial", sans-serif; /* 字体样式 */
+      }
+
+      #text-container {
+        position: absolute;
+        white-space: nowrap;
+        font-size: 24px;
+        opacity: 0; /* 初始透明度为0 */
+        transition: opacity 1s; /* 透明度变化的过渡效果 */
+        text-align: center; /* 文本居中 */
+        padding: 20px; /* 内边距 */
+      }
+
+      a {
+        color: white; /* 链接颜色 */
+        text-decoration: underline; /* 下划线 */
+        position: absolute;
+        left: 50%;
+        top: 60%;
+        transform: translate(-50%, -50%); /* 居中链接 */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="text-container">你好，欢迎来到我的网站！</div>
+
+    <script>
+      const container = document.getElementById("text-container");
+      const texts = [
+        "这是属于2206班的专属回忆",
+        "在盛夏我们懵懵懂懂",
+        "在盛夏我们挥手道别",
+        "多年后再见面，我们已各奔东西",
+        "花径不曾缘客扫",
+        "蓬门今始为君开",
+        "无论你身处何地，这个地方永远有你的一席之地",
+        "欢迎来到这里",
+      ];
+
+      let currentIndex = 0; // 当前文本索引
+
+      function showText() {
+        container.textContent = texts[currentIndex];
+
+        // 居中显示
+        container.style.left = "50%";
+        container.style.top = "50%";
+        container.style.transform = "translate(-50%, -50%)"; // 使文本居中
+
+        // 显示文本
+        container.style.opacity = 1;
+
+        // 1.5秒后开始消失
+        setTimeout(() => {
+          container.style.opacity = 0;
+
+          // 如果是最后一条文本，添加链接
+          if (currentIndex === texts.length - 1) {
+            const link = document.createElement("a");
+            link.href = "q.html"; // 替换为目标链接
+            link.textContent = "那些年我们在一起";
+            document.body.appendChild(link);
+          }
+        }, 1500);
+
+        // 更新索引
+        currentIndex = (currentIndex + 1) % texts.length; // 循环显示
+      }
+
+      // 每3秒显示下一个文本
+      setInterval(showText, 3000);
+      showText(); // 初始调用
+    </script>
+  </body>
+</html>

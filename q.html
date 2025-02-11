@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>2206</title>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans SC", sans-serif; /* 使用支持中文的字体 */
+      }
+
+      .floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #ff0080;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://threejs.org/build/three.module.js",
+          "three/addons/": "https://threejs.org/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { FontLoader } from "three/addons/loaders/FontLoader.js";
+      import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+
+      // 创建粒子系统
+      function createParticleSystem(gu) {
+        let sizes = [];
+        let shifts = [];
+
+        const pushShift = () => {
+          shifts.push(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI * 2,
+            (Math.random() * 0.9 + 0.1) * Math.PI * 0.1,
+            Math.random() * 0.9 + 0.1
+          );
+        };
+
+        const createRandomPoints = (count) => {
+          return Array.from({ length: count }, () => {
+            sizes.push(Math.random() * 1.5 + 0.5);
+            pushShift();
+            return new THREE.Vector3()
+              .randomDirection()
+              .multiplyScalar(Math.random() * 0.5 + 9.5);
+          });
+        };
+
+        // 增加随机点的数量
+        const pts = createRandomPoints(50000);
+        for (let i = 0; i < 100000; i++) {
+          const radius = Math.sqrt(1600 * Math.pow(Math.random(), 1.5) + 100);
+          pts.push(
+            new THREE.Vector3().setFromCylindricalCoords(
+              radius,
+              Math.random() * 2 * Math.PI,
+              (Math.random() - 0.5) * 2
+            )
+          );
+          sizes.push(Math.random() * 1.5 + 0.5);
+          pushShift();
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(pts);
+        geometry.setAttribute(
+          "sizes",
+          new THREE.Float32BufferAttribute(sizes, 1)
+        );
+        geometry.setAttribute(
+          "shift",
+          new THREE.Float32BufferAttribute(shifts, 4)
+        );
+
+        const material = new THREE.PointsMaterial({
+          size: 0.125,
+          transparent: true,
+          depthTest: false,
+          blending: THREE.AdditiveBlending,
+          onBeforeCompile: (shader) => {
+            shader.uniforms.time = gu.time;
+            shader.vertexShader = `
+              uniform float time;
+              attribute float sizes;
+              attribute vec4 shift;
+              varying vec3 vColor;
+              ${shader.vertexShader}
+            `
+              .replace(`gl_PointSize = size;`, `gl_PointSize = size * sizes;`)
+              .replace(
+                `#include <color_vertex>`,
+                `
+                #include <color_vertex>
+                float d = length(abs(position) / vec3(40., 10., 40));
+                d = clamp(d, 0., 1.);
+                vColor = mix(vec3(227., 155., 0.), vec3(100., 50., 255.), d) / 255.;
+              `
+              )
+              .replace(
+                `#include <begin_vertex>`,
+                `
+                #include <begin_vertex>
+                float t = time;
+                float moveT = mod(shift.x + shift.z * t, PI2);
+                float moveS = mod(shift.y + shift.z * t, PI2);
+                transformed += vec3(cos(moveS) * sin(moveT), cos(moveT), sin(moveS) * sin(moveT)) * shift.w;
+              `
+              );
+            shader.fragmentShader = `
+              varying vec3 vColor;
+              ${shader.fragmentShader}
+            `
+              .replace(
+                `#include <clipping_planes_fragment>`,
+                `
+              #include <clipping_planes_fragment>
+              float d = length(gl_PointCoord.xy - 0.5);
+            `
+              )
+              .replace(
+                `
+              float d = length(gl_PointCoord.xy - 0.5);
+              vec4 diffuseColor = vec4( diffuse, opacity );`,
+                `
+              vec4 diffuseColor = vec4( vColor, smoothstep(0.5, 0.1, d) );`
+              );
+          },
+        });
+
+        const points = new THREE.Points(geometry, material);
+        points.rotation.order = "ZYX";
+        points.rotation.z = 0.2;
+        return points;
+      }
+
+      // 创建球体
+      function createSphere(
+        radius = 1,
+        widthSegments = 32,
+        heightSegments = 32,
+        color = 0x0077ff
+      ) {
+        const sphereGeometry = new THREE.SphereGeometry(
+          radius,
+          widthSegments,
+          heightSegments
+        );
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        return sphere;
+      }
+
+      // 球体动画
+      function animateSphere(sphere) {
+        function animate() {
+          sphere.rotation.y += 0.01;
+          requestAnimationFrame(animate);
+        }
+        animate();
+      }
+
+      // 主函数
+      function main() {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+
+        const camera = new THREE.PerspectiveCamera(
+          60,
+          innerWidth / innerHeight,
+          1,
+          1000
+        );
+        camera.position.set(0, 6, 30);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(innerWidth, innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const onWindowResize = () => {
+          camera.aspect = innerWidth / innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(innerWidth, innerHeight);
+        };
+        window.addEventListener("resize", onWindowResize);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enablePan = false;
+
+        const gu = { time: { value: 0 } };
+
+        const points = createParticleSystem(gu);
+        scene.add(points);
+
+        const clock = new THREE.Clock();
+
+        const animate = () => {
+          controls.update();
+          gu.time.value = clock.getElapsedTime() * Math.PI * 0.5;
+          points.rotation.y = gu.time.value * 0.05;
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        const loadingManager = new THREE.LoadingManager();
+
+        loadingManager.onStart = () => {
+          console.log("开始加载");
+        };
+
+        loadingManager.onLoad = () => {
+          console.log("所有资源加载完成");
+        };
+
+        loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+          console.log(
+            `加载中: ${url}, 已加载 ${itemsLoaded} / 共 ${itemsTotal}`
+          );
+        };
+
+        loadingManager.onError = (url) => {
+          console.error(`加载错误: ${url}`);
+        };
+
+        const loader = new FontLoader(loadingManager);
+
+        loader.load(
+          "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json",
+          () => {
+            // 原有的球体
+            const sphere = createSphere();
+            sphere.position.set(5, 10, 70);
+            scene.add(sphere);
+            animateSphere(sphere);
+
+            const redirectUrl = "shipin.html";
+
+            // 鼠标点击事件
+            window.addEventListener("click", (event) => {
+              const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+              );
+
+              const raycaster = new THREE.Raycaster();
+              raycaster.setFromCamera(mouse, camera);
+              const intersects = raycaster.intersectObject(sphere);
+
+              if (intersects.length > 0) {
+                window.location.href = redirectUrl;
+              }
+            });
+
+            // 键盘按键事件
+            window.addEventListener("keydown", (event) => {
+              if (event.key === " ") {
+                const mouse = new THREE.Vector2(
+                  (window.innerWidth / 2 / window.innerWidth) * 2 - 1,
+                  -(window.innerHeight / 2 / window.innerHeight) * 2 + 1
+                );
+
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(sphere);
+
+                if (intersects.length > 0) {
+                  window.location.href = redirectUrl;
+                }
+              }
+            });
+
+            // 触摸事件
+            window.addEventListener("touchstart", (event) => {
+              const touch = event.touches[0];
+              const mouse = new THREE.Vector2(
+                (touch.clientX / window.innerWidth) * 2 - 1,
+                -(touch.clientY / window.innerHeight) * 2 + 1
+              );
+
+              const raycaster = new THREE.Raycaster();
+              raycaster.setFromCamera(mouse, camera);
+              const intersects = raycaster.intersectObject(sphere);
+
+              if (intersects.length > 0) {
+                window.location.href = redirectUrl;
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error("字体加载失败:", error);
+          }
+        );
+      }
+
+      main();
+    </script>
+  </body>
+</html>
